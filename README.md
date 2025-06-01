@@ -1,4 +1,4 @@
-# Welcome to Remix!
+# Penguin Video Generator
 
 - 📖 [Remix docs](https://remix.run/docs)
 

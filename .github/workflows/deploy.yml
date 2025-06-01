@@ -1,0 +1,37 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: 5.189.174.110
+        username: mustafa
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
+          sudo docker stop penguin-video-generator || true
+          sudo docker rm penguin-video-generator || true
+          sudo docker run -d -p 3001:3000 --name penguin-video-generator --restart always ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
