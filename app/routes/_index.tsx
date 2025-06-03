@@ -1,110 +1,195 @@
-import type { MetaFunction, ActionFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useState } from "react";
-import { enhancePromptForPenguin } from "~/lib/prompt-enhancer";
-import { generateImage, generateImageMock } from "~/lib/image-generator";
+import { ErrorBoundary } from "~/components/ErrorBoundary";
+import { PenguinLoader } from "~/components/LoadingSpinner";
+import { OptimizedImage } from "~/components/OptimizedImage";
+import { promptCache } from "~/lib/cache.server";
+import { getConfig } from "~/lib/config.server";
+import {
+  APP_DESCRIPTION,
+  APP_NAME,
+  IMAGE_QUALITY,
+  IMAGE_SIZES,
+  IMAGE_STYLE,
+  STEPS,
+} from "~/lib/constants";
+import { APIError, ValidationError, getErrorDetails } from "~/lib/errors";
 import { logGeneratedImage, updateImageStatus } from "~/lib/file-logger";
+import { generateImage, generateImageMock } from "~/lib/image-generator";
+import { enhancePromptForPenguin } from "~/lib/prompt-enhancer";
+import { checkRateLimit } from "~/lib/rate-limiter.server";
+import {
+  hasError,
+  isApproveActionData,
+  isEnhanceActionData,
+  isGenerateActionData,
+} from "~/lib/type-guards";
+import type { ActionData } from "~/types";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "🐧 Cute Penguin Image Generator" },
-    { name: "description", content: "Generate adorable penguin images with AI" },
+    { title: `🐧 ${APP_NAME}` },
+    { name: "description", content: APP_DESCRIPTION },
+    { name: "viewport", content: "width=device-width,initial-scale=1" },
+    { name: "theme-color", content: "#3b82f6" },
   ];
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const step = formData.get("step") as string;
-  const prompt = formData.get("prompt") as string;
+  try {
+    // Rate limiting
+    const clientIP = request.headers.get("x-forwarded-for") || "unknown";
+    checkRateLimit(clientIP);
 
-  if (step === "approve") {
-    try {
-      const imageId = formData.get("imageId") as string;
-      await updateImageStatus(imageId, "approved");
-      return json({ step: "approve", success: true, message: "Image approved and logged!" });
-    } catch (error) {
-      return json({ 
-        step: "approve", 
-        error: `Failed to approve image: ${error instanceof Error ? error.message : "Unknown error"}`
-      }, { status: 500 });
+    const formData = await request.formData();
+    const step = formData.get("step") as string;
+    const prompt = formData.get("prompt") as string;
+
+    if (!step) {
+      throw new ValidationError("Step is required");
     }
-  }
 
-  if (step === "enhance") {
-    try {
-      const openaiKey = process.env.OPENAI_API_KEY;
-      if (!openaiKey || openaiKey === "your_openai_api_key_here") {
-        // Use fallback enhancement for demo
+    if (step === STEPS.APPROVE) {
+      try {
+        const imageId = formData.get("imageId") as string;
+        await updateImageStatus(imageId, "approved");
         return json({
-          step: "enhance",
-          result: {
-            isAppropriate: true,
-            enhancedPrompt: `A cute penguin in a scenario inspired by: ${prompt}. The penguin has fluffy black and white feathers, bright orange beak and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife photography style, natural lighting, high detail, adorable and heartwarming composition with penguin-themed elements.`,
-            originalPrompt: prompt,
-            reasoning: "Enhanced any prompt to be penguin-themed with detailed characteristics and Antarctic environment",
-            suggestedStyle: "realistic-cute"
-          }
+          step: "approve",
+          success: true,
+          message: "Image approved and logged!",
         });
+      } catch (error) {
+        return json(
+          {
+            step: "approve",
+            error: `Failed to approve image: ${error instanceof Error ? error.message : "Unknown error"}`,
+          },
+          { status: 500 },
+        );
       }
-
-      const result = await enhancePromptForPenguin(prompt, openaiKey);
-      return json({ step: "enhance", result });
-    } catch (error) {
-      return json({ 
-        step: "enhance", 
-        error: `Failed to enhance prompt: ${error instanceof Error ? error.message : "Unknown error"}`
-      }, { status: 500 });
     }
-  }
 
-  if (step === "generate") {
-    try {
-      const enhancedPrompt = formData.get("enhancedPrompt") as string;
-      const originalPrompt = formData.get("originalPrompt") as string;
-      const openaiKey = process.env.OPENAI_API_KEY;
-      
-      let result;
-      
-      // For demo purposes, use mock if no API key
-      if (!openaiKey || openaiKey === "your_openai_api_key_here") {
-        result = generateImageMock({ prompt: enhancedPrompt });
-      } else {
-        result = await generateImage({ 
-          prompt: enhancedPrompt,
-          size: "1024x1024",
-          quality: "hd",
-          style: "vivid"
-        }, openaiKey);
+    if (step === STEPS.ENHANCE) {
+      try {
+        if (!prompt || prompt.trim().length < 3) {
+          throw new ValidationError(
+            "Please enter a prompt with at least 3 characters",
+          );
+        }
+
+        // Check cache first
+        const cacheKey = `enhance:${prompt}`;
+        const cached = promptCache.get(cacheKey);
+        if (cached) {
+          return json({ step: STEPS.ENHANCE, result: JSON.parse(cached) });
+        }
+
+        const config = getConfig();
+        const openaiKey = config.OPENAI_API_KEY;
+
+        if (openaiKey === "your_openai_api_key_here") {
+          // Use fallback enhancement for demo
+          return json({
+            step: "enhance",
+            result: {
+              isAppropriate: true,
+              enhancedPrompt: `A cute penguin in a scenario inspired by: ${prompt}. The penguin has fluffy black and white feathers, bright orange beak and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife photography style, natural lighting, high detail, adorable and heartwarming composition with penguin-themed elements.`,
+              originalPrompt: prompt,
+              reasoning:
+                "Enhanced any prompt to be penguin-themed with detailed characteristics and Antarctic environment",
+              suggestedStyle: "realistic-cute",
+            },
+          });
+        }
+
+        const result = await enhancePromptForPenguin(prompt, openaiKey);
+
+        // Cache the result
+        promptCache.set(cacheKey, JSON.stringify(result));
+
+        return json({ step: STEPS.ENHANCE, result });
+      } catch (error) {
+        return json(
+          {
+            step: "enhance",
+            error: `Failed to enhance prompt: ${error instanceof Error ? error.message : "Unknown error"}`,
+          },
+          { status: 500 },
+        );
       }
-      
-      // Log the generated image
-      await logGeneratedImage({
-        id: result.id,
-        imageUrl: result.imageUrl || "",
-        prompt: originalPrompt || enhancedPrompt,
-        enhancedPrompt: enhancedPrompt,
-        createdAt: result.createdAt,
-        status: "generated",
-        revisedPrompt: result.revisedPrompt,
-      });
-      
-      return json({ step: "generate", result });
-    } catch (error) {
-      return json({ 
-        step: "generate", 
-        error: `Failed to generate image: ${error instanceof Error ? error.message : "Unknown error"}`
-      }, { status: 500 });
     }
-  }
 
-  return json({ error: "Invalid step" }, { status: 400 });
+    if (step === STEPS.GENERATE) {
+      try {
+        const enhancedPrompt = formData.get("enhancedPrompt") as string;
+        const originalPrompt = formData.get("originalPrompt") as string;
+        const config = getConfig();
+        const openaiKey = config.OPENAI_API_KEY;
+
+        let result: any;
+
+        // For demo purposes, use mock if no API key
+        if (!openaiKey || openaiKey === "your_openai_api_key_here") {
+          result = generateImageMock({ prompt: enhancedPrompt });
+        } else {
+          result = await generateImage(
+            {
+              prompt: enhancedPrompt,
+              size: IMAGE_SIZES.SQUARE,
+              quality: IMAGE_QUALITY.HD,
+              style: IMAGE_STYLE.VIVID,
+            },
+            openaiKey,
+          );
+        }
+
+        // Log the generated image
+        await logGeneratedImage({
+          id: result.id,
+          imageUrl: result.imageUrl || "",
+          prompt: originalPrompt || enhancedPrompt,
+          enhancedPrompt: enhancedPrompt,
+          createdAt: result.createdAt,
+          status: "generated",
+          revisedPrompt: result.revisedPrompt,
+        });
+
+        return json({ step: STEPS.GENERATE, result });
+      } catch (error) {
+        return json(
+          {
+            step: "generate",
+            error: `Failed to generate image: ${error instanceof Error ? error.message : "Unknown error"}`,
+          },
+          { status: 500 },
+        );
+      }
+    }
+
+    return json({ error: "Invalid step" }, { status: 400 });
+  } catch (error) {
+    const errorDetails = getErrorDetails(error);
+    return json(
+      {
+        error: errorDetails.message,
+        code: errorDetails.code,
+        details: errorDetails.details,
+      },
+      { status: errorDetails.statusCode || 500 },
+    );
+  }
 };
 
+export { ErrorBoundary };
+
 export default function Index() {
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
-  const [currentStep, setCurrentStep] = useState<"prompt" | "enhance" | "generate">("prompt");
+  const [currentStep, setCurrentStep] = useState<
+    (typeof STEPS)[keyof typeof STEPS]
+  >(STEPS.PROMPT);
 
   const isLoading = navigation.state === "submitting";
 
@@ -125,16 +210,34 @@ export default function Index() {
           {/* Progress Steps */}
           <div className="flex justify-center mb-8">
             <div className="flex space-x-8">
-              <div className={`flex items-center space-x-2 ${currentStep === "prompt" ? "text-yellow-300" : "text-blue-200"}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "prompt" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}>1</div>
+              <div
+                className={`flex items-center space-x-2 ${currentStep === "prompt" ? "text-yellow-300" : "text-blue-200"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "prompt" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}
+                >
+                  1
+                </div>
                 <span>Write Prompt</span>
               </div>
-              <div className={`flex items-center space-x-2 ${currentStep === "enhance" ? "text-yellow-300" : "text-blue-200"}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "enhance" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}>2</div>
+              <div
+                className={`flex items-center space-x-2 ${currentStep === "enhance" ? "text-yellow-300" : "text-blue-200"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "enhance" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}
+                >
+                  2
+                </div>
                 <span>Enhance Prompt</span>
               </div>
-              <div className={`flex items-center space-x-2 ${currentStep === "generate" ? "text-yellow-300" : "text-blue-200"}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "generate" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}>3</div>
+              <div
+                className={`flex items-center space-x-2 ${currentStep === "generate" ? "text-yellow-300" : "text-blue-200"}`}
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === "generate" ? "bg-yellow-300 text-blue-900" : "bg-blue-200 text-blue-600"}`}
+                >
+                  3
+                </div>
                 <span>Generate Image</span>
               </div>
             </div>
@@ -151,7 +254,10 @@ export default function Index() {
                 <Form method="post" className="space-y-6">
                   <input type="hidden" name="step" value="enhance" />
                   <div>
-                    <label htmlFor="prompt" className="block text-lg font-medium text-gray-700 mb-2">
+                    <label
+                      htmlFor="prompt"
+                      className="block text-lg font-medium text-gray-700 mb-2"
+                    >
                       How should your penguin look?
                     </label>
                     <textarea
@@ -166,39 +272,49 @@ export default function Index() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-colors disabled:opacity-50"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? "Enhancing..." : "✨ Enhance for Penguins"}
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <PenguinLoader message="Enhancing..." />
+                      </div>
+                    ) : (
+                      "✨ Enhance for Penguins"
+                    )}
                   </button>
                 </Form>
               </div>
             )}
 
             {/* Step 2: Enhanced Prompt Review */}
-            {actionData?.step === "enhance" && !actionData.error && (
+            {isEnhanceActionData(actionData) && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
                   Step 2: Enhanced Penguin Prompt
                 </h2>
                 <div className="space-y-6">
                   <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                    <h3 className="font-semibold text-green-800 mb-2">✨ Prompt Enhanced!</h3>
-                    <p className="text-green-700">{actionData.result.reasoning}</p>
+                    <h3 className="font-semibold text-green-800 mb-2">
+                      ✨ Prompt Enhanced!
+                    </h3>
+                    <p className="text-green-700">
+                      {actionData.result.reasoning}
+                    </p>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-2">
+                    <div className="block text-lg font-medium text-gray-700 mb-2">
                       Original Prompt:
-                    </label>
+                    </div>
                     <div className="bg-gray-100 p-3 rounded-lg text-gray-800">
                       {actionData.result.originalPrompt}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-lg font-medium text-gray-700 mb-2">
+                    <div className="block text-lg font-medium text-gray-700 mb-2">
                       Enhanced Prompt:
-                    </label>
+                    </div>
                     <div className="bg-blue-50 p-4 rounded-lg text-blue-900 border-l-4 border-blue-400">
                       {actionData.result.enhancedPrompt}
                     </div>
@@ -206,14 +322,28 @@ export default function Index() {
 
                   <Form method="post" className="flex space-x-4">
                     <input type="hidden" name="step" value="generate" />
-                    <input type="hidden" name="enhancedPrompt" value={actionData.result.enhancedPrompt} />
-                    <input type="hidden" name="originalPrompt" value={actionData.result.originalPrompt} />
+                    <input
+                      type="hidden"
+                      name="enhancedPrompt"
+                      value={actionData.result.enhancedPrompt}
+                    />
+                    <input
+                      type="hidden"
+                      name="originalPrompt"
+                      value={actionData.result.originalPrompt}
+                    />
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-colors disabled:opacity-50"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? "Generating Image..." : "🎨 Generate Image"}
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <PenguinLoader message="Generating Image..." />
+                        </div>
+                      ) : (
+                        "🎨 Generate Image"
+                      )}
                     </button>
                     <button
                       type="button"
@@ -231,41 +361,59 @@ export default function Index() {
             )}
 
             {/* Step 3: Image Generation Result */}
-            {actionData?.step === "generate" && !actionData.error && (
+            {isGenerateActionData(actionData) && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
                   Step 3: Your Penguin Image
                 </h2>
                 <div className="space-y-6">
                   <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                    <h3 className="font-semibold text-green-800 mb-2">🎉 Image Generated!</h3>
-                    <p className="text-green-700">Your cute penguin image is ready!</p>
+                    <h3 className="font-semibold text-green-800 mb-2">
+                      🎉 Image Generated!
+                    </h3>
+                    <p className="text-green-700">
+                      Your cute penguin image is ready!
+                    </p>
                   </div>
 
                   {actionData.result.imageUrl && (
                     <div className="bg-white p-4 rounded-lg shadow-lg">
-                      <img 
-                        src={actionData.result.imageUrl} 
-                        alt="Generated penguin" 
+                      <OptimizedImage
+                        src={actionData.result.imageUrl}
+                        alt="Generated penguin"
                         className="w-full max-w-lg mx-auto rounded-lg shadow-md"
+                        width={1024}
+                        height={1024}
                       />
                     </div>
                   )}
 
                   <div className="bg-blue-50 p-6 rounded-lg">
-                    <h3 className="font-semibold text-blue-800 mb-3">Image Details:</h3>
-                    <p><strong>ID:</strong> {actionData.result.id}</p>
-                    <p><strong>Status:</strong> {actionData.result.status}</p>
-                    <p><strong>Created:</strong> {new Date(actionData.result.createdAt).toLocaleString()}</p>
+                    <h3 className="font-semibold text-blue-800 mb-3">
+                      Image Details:
+                    </h3>
+                    <p>
+                      <strong>ID:</strong> {actionData.result.id}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {actionData.result.status}
+                    </p>
+                    <p>
+                      <strong>Created:</strong>{" "}
+                      {new Date(actionData.result.createdAt).toLocaleString()}
+                    </p>
                     {actionData.result.revisedPrompt && (
-                      <p><strong>AI Enhanced Prompt:</strong> {actionData.result.revisedPrompt}</p>
+                      <p>
+                        <strong>AI Enhanced Prompt:</strong>{" "}
+                        {actionData.result.revisedPrompt}
+                      </p>
                     )}
-                    
+
                     {actionData.result.imageUrl && (
                       <div className="mt-4 flex space-x-4">
-                        <a 
-                          href={actionData.result.imageUrl} 
-                          target="_blank" 
+                        <a
+                          href={actionData.result.imageUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
                         >
@@ -273,8 +421,15 @@ export default function Index() {
                         </a>
                         <Form method="post" className="inline">
                           <input type="hidden" name="step" value="approve" />
-                          <input type="hidden" name="imageId" value={actionData.result.id} />
-                          <button type="submit" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                          <input
+                            type="hidden"
+                            name="imageId"
+                            value={actionData.result.id}
+                          />
+                          <button
+                            type="submit"
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                          >
                             ✅ Approve for Design Flow
                           </button>
                         </Form>
@@ -283,6 +438,7 @@ export default function Index() {
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => {
                       setCurrentStep("prompt");
                       window.location.reload();
@@ -296,19 +452,22 @@ export default function Index() {
             )}
 
             {/* Approval Success */}
-            {actionData?.step === "approve" && actionData.success && (
+            {isApproveActionData(actionData) && (
               <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                <h3 className="font-semibold text-green-800 mb-2">✅ Success!</h3>
+                <h3 className="font-semibold text-green-800 mb-2">
+                  ✅ Success!
+                </h3>
                 <p className="text-green-700">{actionData.message}</p>
               </div>
             )}
 
             {/* Error Display */}
-            {actionData?.error && (
+            {hasError(actionData) && (
               <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
                 <h3 className="font-semibold text-red-800 mb-2">❌ Error</h3>
                 <p className="text-red-700">{actionData.error}</p>
                 <button
+                  type="button"
                   onClick={() => {
                     setCurrentStep("prompt");
                     window.location.reload();

@@ -1,3 +1,5 @@
+import { APIError } from "./errors";
+
 export interface PromptEnhancementResult {
   isAppropriate: boolean;
   enhancedPrompt: string;
@@ -8,10 +10,14 @@ export interface PromptEnhancementResult {
 
 export async function enhancePromptForPenguin(
   originalPrompt: string,
-  apiKey?: string
+  apiKey: string,
 ): Promise<PromptEnhancementResult> {
-  if (!apiKey) {
-    throw new Error("OpenAI API key is required for prompt enhancement");
+  if (!originalPrompt || originalPrompt.trim().length === 0) {
+    throw new APIError("Prompt cannot be empty", 400);
+  }
+
+  if (originalPrompt.length > 1000) {
+    throw new APIError("Prompt is too long (max 1000 characters)", 400);
   }
 
   const systemPrompt = `You are an expert at creating prompts for AI image generation focused on cute penguin content.
@@ -44,7 +50,7 @@ Response format: JSON with fields:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
@@ -64,12 +70,16 @@ Response format: JSON with fields:
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || "Unknown error"}`);
+      throw new APIError(
+        `OpenAI API error: ${errorData.error?.message || "Unknown error"}`,
+        response.status,
+        errorData,
+      );
     }
 
     const data = await response.json();
     const content = data.choices[0].message.content;
-    
+
     try {
       const result = JSON.parse(content);
       return {
@@ -85,12 +95,20 @@ Response format: JSON with fields:
         isAppropriate: true,
         enhancedPrompt: `A cute penguin in a scenario inspired by: ${originalPrompt}. The penguin has fluffy black and white feathers, bright orange beak and webbed feet, and adorable round dark eyes. Set in a beautiful Antarctic landscape with pristine white snow and sparkling ice formations. Professional wildlife photography style, natural lighting, high detail, adorable and heartwarming composition with penguin-themed elements.`,
         originalPrompt: originalPrompt,
-        reasoning: "Enhanced any prompt to be penguin-themed with detailed characteristics and Antarctic setting",
+        reasoning:
+          "Enhanced any prompt to be penguin-themed with detailed characteristics and Antarctic setting",
         suggestedStyle: "realistic-cute",
       };
     }
   } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
     console.error("Error enhancing prompt:", error);
-    throw new Error("Failed to enhance prompt");
+    throw new APIError(
+      "Failed to enhance prompt. Please try again later.",
+      500,
+      error,
+    );
   }
 }

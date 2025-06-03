@@ -19,7 +19,8 @@
     "@remix-run/serve": "^2.16.8",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "zod": "^3.25.49"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
