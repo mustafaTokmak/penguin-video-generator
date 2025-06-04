@@ -89,7 +89,28 @@ function createPenguinPrompt(originalPrompt: string): string {
     "on a sunny tropical island where penguins are vacationing",
     "in a penguin city with ice skyscrapers and frozen transportation",
     "at a penguin spa with hot springs and relaxing ice baths",
-    "in a magical winter wonderland with floating snowflakes and dancing lights"
+    "in a magical winter wonderland with floating snowflakes and dancing lights",
+    // Human-like environments
+    "at a cozy penguin home with penguin-sized furniture and family photos",
+    "in a penguin school classroom with tiny desks and a chalkboard",
+    "at a busy penguin airport with luggage carts and departure boards",
+    "in a penguin office building with water coolers and cubicles",
+    "at a penguin shopping mall with stores and escalators",
+    "in a penguin hospital with stethoscopes and medical equipment",
+    "at a penguin restaurant with menus and chef hats",
+    "in a penguin library with towering bookshelves and reading glasses",
+    "at a penguin gym with tiny weights and exercise equipment",
+    "in a penguin movie theater with popcorn and 3D glasses",
+    "at a penguin coffee shop with espresso machines and pastries",
+    "in a penguin bank with tiny briefcases and calculators",
+    "at a penguin hair salon with mirrors and styling tools",
+    "in a penguin supermarket with shopping carts and checkout lanes",
+    "at a penguin gas station with miniature fuel pumps",
+    "in a penguin dental office with tiny dental chairs",
+    "at a penguin wedding venue with flowers and decorations",
+    "in a penguin courtroom with judge's gavels and lawyer wigs",
+    "at a penguin fire station with tiny fire trucks and helmets",
+    "in a penguin newsroom with cameras and microphones"
   ];
   
   const scenarios = [
@@ -107,7 +128,33 @@ function createPenguinPrompt(originalPrompt: string): string {
     `A penguin art class ${originalPrompt}`,
     `A penguin book club ${originalPrompt}`,
     `A penguin yoga class ${originalPrompt}`,
-    `A penguin construction crew ${originalPrompt}`
+    `A penguin construction crew ${originalPrompt}`,
+    // Human-like scenarios
+    `A penguin family ${originalPrompt}`,
+    `A penguin student ${originalPrompt}`,
+    `A penguin teacher ${originalPrompt}`,
+    `A penguin doctor ${originalPrompt}`,
+    `A penguin businessman ${originalPrompt}`,
+    `A penguin pilot ${originalPrompt}`,
+    `A penguin cashier ${originalPrompt}`,
+    `A penguin librarian ${originalPrompt}`,
+    `A penguin barista ${originalPrompt}`,
+    `A penguin mechanic ${originalPrompt}`,
+    `A penguin firefighter ${originalPrompt}`,
+    `A penguin police officer ${originalPrompt}`,
+    `A penguin chef ${originalPrompt}`,
+    `A penguin hairdresser ${originalPrompt}`,
+    `A penguin dentist ${originalPrompt}`,
+    `A penguin journalist ${originalPrompt}`,
+    `A penguin lawyer ${originalPrompt}`,
+    `A penguin banker ${originalPrompt}`,
+    `A penguin personal trainer ${originalPrompt}`,
+    `A penguin taxi driver ${originalPrompt}`,
+    `A penguin wedding planner ${originalPrompt}`,
+    `A penguin mailman ${originalPrompt}`,
+    `A penguin security guard ${originalPrompt}`,
+    `A penguin photographer ${originalPrompt}`,
+    `A penguin musician ${originalPrompt}`
   ];
   
   const cameraStyles = [
