@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const envSchema = z.object({
   FAL_API_KEY: z.string().min(1, "Fal AI API key is required"),
-  OPENAI_API_KEY: z.string().min(1, "OpenAI API key is required"),
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),

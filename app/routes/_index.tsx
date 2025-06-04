@@ -41,8 +41,13 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const videos = await loadVideos();
-  return json({ videos });
+  try {
+    const videos = await loadVideos();
+    return json({ videos });
+  } catch (error) {
+    console.error("Error loading videos:", error);
+    return json({ videos: [] });
+  }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -95,9 +100,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
 
         const config = getConfig();
-        const openaiKey = config.OPENAI_API_KEY;
+        const falKey = config.FAL_API_KEY;
 
-        if (openaiKey === "your_openai_api_key_here") {
+        if (!falKey || falKey === "your_fal_api_key_here") {
           // Use fallback enhancement for demo
           return json({
             step: "enhance",
@@ -112,7 +117,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           });
         }
 
-        const result = await enhancePromptForPenguin(prompt, openaiKey);
+        const result = await enhancePromptForPenguin(prompt, falKey);
 
         // Cache the result
         promptCache.set(cacheKey, JSON.stringify(result));
