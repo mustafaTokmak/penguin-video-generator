@@ -59,9 +59,12 @@ export async function generateVideo(
       credentials: apiKey,
     });
 
+    // Add framing instructions to ensure proper shot composition
+    const finalPrompt = `${enhancedPrompt}. Wide shot, full body framing, avoid extreme close-ups, show complete penguin figures with environmental context.`;
+
     const result = await fal.subscribe("fal-ai/kling-video/v1.6/standard/text-to-video", {
       input: {
-        prompt: enhancedPrompt,
+        prompt: finalPrompt,
         aspect_ratio: "9:16",
         duration: request.duration || 5,
       },

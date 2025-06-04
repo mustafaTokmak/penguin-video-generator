@@ -158,16 +158,16 @@ function createPenguinPrompt(originalPrompt: string): string {
   ];
   
   const cameraStyles = [
-    "Professional wildlife videography style, natural lighting, smooth movements",
-    "Cinematic drone footage with sweeping camera movements",
-    "Intimate close-up shots with shallow depth of field",
-    "Time-lapse photography capturing the magical transformation",
-    "Slow-motion capture highlighting every adorable detail",
-    "Documentary-style filming with natural behavior focus",
-    "Artistic film noir style with dramatic lighting",
-    "Whimsical cartoon-inspired cinematography",
-    "Epic landscape shots with penguins as heroic subjects",
-    "Macro photography revealing intricate penguin features"
+    "Wide establishing shot showing full penguin bodies and environment, professional wildlife videography style, natural lighting",
+    "Medium shot capturing penguins from head to feet with surrounding context, cinematic composition",
+    "Full body shot with plenty of background space, documentary-style filming with natural behavior focus",
+    "Wide angle view showing multiple penguins in their environment, sweeping camera movements",
+    "Medium-wide framing with penguins visible from head to toe, smooth cinematic movements",
+    "Establishing shot showing penguins in their full habitat, epic landscape composition",
+    "Full figure framing with environmental context, whimsical cartoon-inspired cinematography",
+    "Wide shot capturing the complete scene and penguin interactions, artistic lighting",
+    "Medium establishing shot with proper headroom and breathing space, time-lapse style",
+    "Full body coverage with scenic background visible, slow-motion capture with perfect framing"
   ];
   
   const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
@@ -181,5 +181,5 @@ function createPenguinPrompt(originalPrompt: string): string {
   
   const enhancedPrompt = `${randomScenario} ${actionPart}`;
   
-  return `${enhancedPrompt} ${randomEnvironment}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. ${randomCameraStyle}, heartwarming and delightful composition with magical penguin charm.`;
+  return `${enhancedPrompt} ${randomEnvironment}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. ${randomCameraStyle}. Frame the shot to show the full penguin bodies from head to feet with proper spacing, avoiding extreme close-ups. Include environmental context and background elements for a well-composed, heartwarming scene with magical penguin charm.`;
 }
