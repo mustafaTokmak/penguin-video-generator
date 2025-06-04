@@ -114,47 +114,47 @@ function createPenguinPrompt(originalPrompt: string): string {
   ];
   
   const scenarios = [
-    `A colony of adorable penguins ${originalPrompt}`,
-    `A group of playful penguin friends ${originalPrompt}`,
-    `A family of emperor penguins ${originalPrompt}`,
-    `Baby penguins adorably ${originalPrompt}`,
-    `A wise old penguin and young chicks ${originalPrompt}`,
-    `A penguin couple romantically ${originalPrompt}`,
-    `A team of penguin explorers ${originalPrompt}`,
-    `A penguin dance troupe ${originalPrompt}`,
-    `A group of penguin chefs ${originalPrompt}`,
-    `A penguin marching band ${originalPrompt}`,
-    `A penguin sports team ${originalPrompt}`,
-    `A penguin art class ${originalPrompt}`,
-    `A penguin book club ${originalPrompt}`,
-    `A penguin yoga class ${originalPrompt}`,
-    `A penguin construction crew ${originalPrompt}`,
+    "A colony of adorable penguins",
+    "A group of playful penguin friends",
+    "A family of emperor penguins",
+    "Baby penguins adorably",
+    "A wise old penguin and young chicks",
+    "A penguin couple romantically",
+    "A team of penguin explorers",
+    "A penguin dance troupe",
+    "A group of penguin chefs",
+    "A penguin marching band",
+    "A penguin sports team",
+    "A penguin art class",
+    "A penguin book club",
+    "A penguin yoga class",
+    "A penguin construction crew",
     // Human-like scenarios
-    `A penguin family ${originalPrompt}`,
-    `A penguin student ${originalPrompt}`,
-    `A penguin teacher ${originalPrompt}`,
-    `A penguin doctor ${originalPrompt}`,
-    `A penguin businessman ${originalPrompt}`,
-    `A penguin pilot ${originalPrompt}`,
-    `A penguin cashier ${originalPrompt}`,
-    `A penguin librarian ${originalPrompt}`,
-    `A penguin barista ${originalPrompt}`,
-    `A penguin mechanic ${originalPrompt}`,
-    `A penguin firefighter ${originalPrompt}`,
-    `A penguin police officer ${originalPrompt}`,
-    `A penguin chef ${originalPrompt}`,
-    `A penguin hairdresser ${originalPrompt}`,
-    `A penguin dentist ${originalPrompt}`,
-    `A penguin journalist ${originalPrompt}`,
-    `A penguin lawyer ${originalPrompt}`,
-    `A penguin banker ${originalPrompt}`,
-    `A penguin personal trainer ${originalPrompt}`,
-    `A penguin taxi driver ${originalPrompt}`,
-    `A penguin wedding planner ${originalPrompt}`,
-    `A penguin mailman ${originalPrompt}`,
-    `A penguin security guard ${originalPrompt}`,
-    `A penguin photographer ${originalPrompt}`,
-    `A penguin musician ${originalPrompt}`
+    "A penguin family",
+    "A penguin student",
+    "A penguin teacher",
+    "A penguin doctor",
+    "A penguin businessman",
+    "A penguin pilot",
+    "A penguin cashier",
+    "A penguin librarian",
+    "A penguin barista",
+    "A penguin mechanic",
+    "A penguin firefighter",
+    "A penguin police officer",
+    "A penguin chef",
+    "A penguin hairdresser",
+    "A penguin dentist",
+    "A penguin journalist",
+    "A penguin lawyer",
+    "A penguin banker",
+    "A penguin personal trainer",
+    "A penguin taxi driver",
+    "A penguin wedding planner",
+    "A penguin mailman",
+    "A penguin security guard",
+    "A penguin photographer",
+    "A penguin musician"
   ];
   
   const cameraStyles = [
@@ -174,15 +174,12 @@ function createPenguinPrompt(originalPrompt: string): string {
   const randomEnvironment = environments[Math.floor(Math.random() * environments.length)];
   const randomCameraStyle = cameraStyles[Math.floor(Math.random() * cameraStyles.length)];
   
-  // Always add randomness, even if prompt already contains penguins
-  let enhancedPrompt: string;
-  if (cleanPrompt.includes('penguin')) {
-    // Remove penguin from the original prompt to avoid duplication
-    const actionPart = originalPrompt.replace(/penguin[s]?/gi, '').trim();
-    enhancedPrompt = `${randomScenario.replace('${originalPrompt}', actionPart)}`;
-  } else {
-    enhancedPrompt = `${randomScenario}`;
-  }
+  // Create the enhanced prompt by combining scenario with action
+  const actionPart = cleanPrompt.includes('penguin') 
+    ? originalPrompt.replace(/penguin[s]?/gi, '').trim() 
+    : originalPrompt;
+  
+  const enhancedPrompt = `${randomScenario} ${actionPart}`;
   
   return `${enhancedPrompt} ${randomEnvironment}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. ${randomCameraStyle}, heartwarming and delightful composition with magical penguin charm.`;
 }
