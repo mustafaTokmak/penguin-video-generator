@@ -21,7 +21,7 @@ export async function enhancePromptForPenguin(
     throw new APIError("Prompt is too long (max 1000 characters)", 400);
   }
 
-  // Always add penguin context to the prompt
+  // Add penguin context to the prompt
   const penguinPrompt = `cute adorable penguin ${originalPrompt}`;
 
   try {
@@ -29,13 +29,20 @@ export async function enhancePromptForPenguin(
       credentials: apiKey,
     });
 
-    const result = await fal.run("fal-ai/video-prompt-generator", {
+    const result = await fal.subscribe("fal-ai/video-prompt-generator", {
       input: {
         input_concept: penguinPrompt,
+        style: "Detailed",
+        camera_style: "Gimbal smoothness",
+        camera_direction: "None",
+        pacing: "Slow burn",
+        special_effects: "None",
+        model: "google/gemini-flash-1.5",
+        prompt_length: "Medium"
       },
-    }) as { prompt: string };
+    }) as { data: { prompt: string } };
 
-    const enhancedPrompt = result.prompt || penguinPrompt;
+    const enhancedPrompt = result.data?.prompt || createPenguinPrompt(originalPrompt);
 
     // Ensure the enhanced prompt has penguin content
     const finalPrompt = enhancedPrompt.toLowerCase().includes('penguin') 
@@ -51,18 +58,37 @@ export async function enhancePromptForPenguin(
     };
   } catch (error: unknown) {
     console.warn("Failed to enhance prompt with fal.ai, using fallback:", error);
-    if (error && typeof error === 'object' && 'body' in error && 
-        error.body && typeof error.body === 'object' && 'detail' in error.body) {
-      console.error("Validation error details:", JSON.stringify(error.body.detail, null, 2));
-    }
     
     // Fallback enhancement
     return {
       isAppropriate: true,
-      enhancedPrompt: `A cute penguin in a scenario inspired by: ${originalPrompt}. The penguin has fluffy black and white feathers, bright orange beak and webbed feet, and adorable round dark eyes. Set in a beautiful Antarctic landscape with pristine white snow and sparkling ice formations. Professional wildlife videography style, natural lighting, smooth movements, adorable and heartwarming composition with penguin-themed elements.`,
+      enhancedPrompt: createPenguinPrompt(originalPrompt),
       originalPrompt: originalPrompt,
-      reasoning: "Enhanced prompt to be penguin-themed with detailed characteristics and Antarctic setting",
+      reasoning: "Enhanced prompt to be penguin-themed with detailed characteristics and Antarctic setting (fallback)",
       suggestedStyle: "realistic-cute",
     };
   }
+}
+
+function createPenguinPrompt(originalPrompt: string): string {
+  const cleanPrompt = originalPrompt.trim().toLowerCase();
+  
+  // If it already mentions penguins, enhance it
+  if (cleanPrompt.includes('penguin')) {
+    return `${originalPrompt}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, cinematic quality.`;
+  }
+  
+  // Transform any prompt into a penguin scenario
+  const penguinScenarios = [
+    `A group of adorable penguins ${originalPrompt} in their natural Antarctic habitat`,
+    `Cute penguins playfully ${originalPrompt} on the icy Antarctic terrain`,
+    `A family of penguins ${originalPrompt} with snow-covered mountains in the background`,
+    `Baby penguins ${originalPrompt} while their parents watch lovingly nearby`,
+    `Emperor penguins ${originalPrompt} as aurora borealis dances in the sky above`
+  ];
+  
+  const randomScenario = penguinScenarios[Math.floor(Math.random() * penguinScenarios.length)];
+  
+  return `${randomScenario}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. The scene is set in a beautiful Antarctic landscape with pristine white snow, sparkling ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, heartwarming and delightful composition.`;
+}
 }
