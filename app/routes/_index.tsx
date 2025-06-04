@@ -37,6 +37,10 @@ export const meta: MetaFunction = () => {
     { name: "description", content: APP_DESCRIPTION },
     { name: "viewport", content: "width=device-width,initial-scale=1" },
     { name: "theme-color", content: "#3b82f6" },
+    { name: "apple-mobile-web-app-capable", content: "yes" },
+    { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+    { rel: "apple-touch-icon", href: "/favicon.ico" },
+    { rel: "apple-touch-icon-precomposed", href: "/favicon.ico" },
   ];
 };
 
