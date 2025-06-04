@@ -34,4 +34,7 @@ jobs:
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
           sudo docker stop penguin-video-generator || true
           sudo docker rm penguin-video-generator || true
-          sudo docker run -d -p 3017:3000 --name penguin-video-generator --restart always -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
+          sudo docker run -d -p 3017:3000 --name penguin-video-generator --restart always \
+            -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+            -e FAL_API_KEY=${{ secrets.FAL_API_KEY }} \
+            ${{ secrets.DOCKER_USERNAME }}/penguin-video-generator:latest
