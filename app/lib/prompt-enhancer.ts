@@ -73,21 +73,64 @@ export async function enhancePromptForPenguin(
 function createPenguinPrompt(originalPrompt: string): string {
   const cleanPrompt = originalPrompt.trim().toLowerCase();
   
-  // If it already mentions penguins, enhance it
-  if (cleanPrompt.includes('penguin')) {
-    return `${originalPrompt}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, cinematic quality.`;
-  }
-  
-  // Transform any prompt into a penguin scenario
-  const penguinScenarios = [
-    `A group of adorable penguins ${originalPrompt} in their natural Antarctic habitat`,
-    `Cute penguins playfully ${originalPrompt} on the icy Antarctic terrain`,
-    `A family of penguins ${originalPrompt} with snow-covered mountains in the background`,
-    `Baby penguins ${originalPrompt} while their parents watch lovingly nearby`,
-    `Emperor penguins ${originalPrompt} as aurora borealis dances in the sky above`
+  // Diverse environments for penguin scenarios
+  const environments = [
+    "in the pristine Antarctic landscape with sparkling white snow and crystal-clear ice formations",
+    "at a bustling penguin colony with hundreds of penguins socializing and playing",
+    "on a dramatic ice cliff overlooking the vast Antarctic ocean",
+    "in a magical underwater world with colorful coral reefs and tropical fish",
+    "in a cozy penguin village with ice houses and snow-covered pathways",
+    "on a floating iceberg surrounded by calm, mirror-like waters",
+    "in a snowy forest filled with ice sculptures and frozen waterfalls",
+    "at a penguin beach party with sand castles made of snow and ice",
+    "in a mystical aurora-lit cave filled with glowing ice crystals",
+    "at a penguin carnival with ice slides, snow cones, and festive decorations",
+    "in a penguin laboratory with cute scientific equipment made of ice",
+    "on a sunny tropical island where penguins are vacationing",
+    "in a penguin city with ice skyscrapers and frozen transportation",
+    "at a penguin spa with hot springs and relaxing ice baths",
+    "in a magical winter wonderland with floating snowflakes and dancing lights"
   ];
   
-  const randomScenario = penguinScenarios[Math.floor(Math.random() * penguinScenarios.length)];
+  const scenarios = [
+    `A colony of adorable penguins ${originalPrompt}`,
+    `A group of playful penguin friends ${originalPrompt}`,
+    `A family of emperor penguins ${originalPrompt}`,
+    `Baby penguins adorably ${originalPrompt}`,
+    `A wise old penguin and young chicks ${originalPrompt}`,
+    `A penguin couple romantically ${originalPrompt}`,
+    `A team of penguin explorers ${originalPrompt}`,
+    `A penguin dance troupe ${originalPrompt}`,
+    `A group of penguin chefs ${originalPrompt}`,
+    `A penguin marching band ${originalPrompt}`,
+    `A penguin sports team ${originalPrompt}`,
+    `A penguin art class ${originalPrompt}`,
+    `A penguin book club ${originalPrompt}`,
+    `A penguin yoga class ${originalPrompt}`,
+    `A penguin construction crew ${originalPrompt}`
+  ];
   
-  return `${randomScenario}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. The scene is set in a beautiful Antarctic landscape with pristine white snow, sparkling ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, heartwarming and delightful composition.`;
+  const cameraStyles = [
+    "Professional wildlife videography style, natural lighting, smooth movements",
+    "Cinematic drone footage with sweeping camera movements",
+    "Intimate close-up shots with shallow depth of field",
+    "Time-lapse photography capturing the magical transformation",
+    "Slow-motion capture highlighting every adorable detail",
+    "Documentary-style filming with natural behavior focus",
+    "Artistic film noir style with dramatic lighting",
+    "Whimsical cartoon-inspired cinematography",
+    "Epic landscape shots with penguins as heroic subjects",
+    "Macro photography revealing intricate penguin features"
+  ];
+  
+  const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+  const randomEnvironment = environments[Math.floor(Math.random() * environments.length)];
+  const randomCameraStyle = cameraStyles[Math.floor(Math.random() * cameraStyles.length)];
+  
+  // Always add randomness, even if prompt already contains penguins
+  const enhancedPrompt = cleanPrompt.includes('penguin') 
+    ? `${randomScenario} as they ${originalPrompt.replace(/penguin[s]?/gi, '').trim()}`
+    : `${randomScenario} ${originalPrompt}`;
+  
+  return `${enhancedPrompt} ${randomEnvironment}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. ${randomCameraStyle}, heartwarming and delightful composition with magical penguin charm.`;
 }
