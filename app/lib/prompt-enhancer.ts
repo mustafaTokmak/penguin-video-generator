@@ -175,9 +175,14 @@ function createPenguinPrompt(originalPrompt: string): string {
   const randomCameraStyle = cameraStyles[Math.floor(Math.random() * cameraStyles.length)];
   
   // Always add randomness, even if prompt already contains penguins
-  const enhancedPrompt = cleanPrompt.includes('penguin') 
-    ? `${randomScenario} as they ${originalPrompt.replace(/penguin[s]?/gi, '').trim()}`
-    : `${randomScenario} ${originalPrompt}`;
+  let enhancedPrompt: string;
+  if (cleanPrompt.includes('penguin')) {
+    // Remove penguin from the original prompt to avoid duplication
+    const actionPart = originalPrompt.replace(/penguin[s]?/gi, '').trim();
+    enhancedPrompt = `${randomScenario.replace('${originalPrompt}', actionPart)}`;
+  } else {
+    enhancedPrompt = `${randomScenario}`;
+  }
   
   return `${enhancedPrompt} ${randomEnvironment}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. ${randomCameraStyle}, heartwarming and delightful composition with magical penguin charm.`;
 }
