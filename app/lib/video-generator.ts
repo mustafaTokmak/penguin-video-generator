@@ -62,7 +62,12 @@ export async function generateVideo(
     // Add framing instructions to ensure proper shot composition
     const finalPrompt = `${enhancedPrompt}. Wide shot, full body framing, avoid extreme close-ups, show complete penguin figures with environmental context.`;
 
-    const result = await fal.subscribe("fal-ai/kling-video/v1.6/standard/text-to-video", {
+    // Use subscribe with timeout wrapper to handle long-running requests
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new APIError("Video generation timed out", 504)), 300000); // 5 minute timeout
+    });
+
+    const videoPromise = fal.subscribe("fal-ai/kling-video/v1.6/standard/text-to-video", {
       input: {
         prompt: finalPrompt,
         aspect_ratio: "9:16",
@@ -70,11 +75,14 @@ export async function generateVideo(
       },
       logs: true,
       onQueueUpdate: (update) => {
-        if (update.status === "IN_PROGRESS") {
-          console.log("Video generation in progress...");
+        console.log(`Video generation status: ${update.status}`);
+        if (update.logs) {
+          update.logs.forEach(log => console.log(`[${log.timestamp}] ${log.message}`));
         }
       },
-    }) as { video: { url: string } };
+    }) as Promise<{ video: { url: string } }>;
+
+    const result = await Promise.race([videoPromise, timeoutPromise]) as { video: { url: string } };
 
     if (!result.video || !result.video.url) {
       throw new APIError("Video generation failed: No video data returned", 500);

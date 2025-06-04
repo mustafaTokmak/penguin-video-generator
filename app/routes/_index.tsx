@@ -442,7 +442,7 @@ export default function Index() {
                     >
                       {isLoading ? (
                         <div className="flex items-center justify-center">
-                          <PenguinLoader message="Generating Video..." />
+                          <PenguinLoader message="Generating Video (this may take 2-3 minutes)..." />
                         </div>
                       ) : (
                         "🎨 Generate Video"
