@@ -91,4 +91,3 @@ function createPenguinPrompt(originalPrompt: string): string {
   
   return `${randomScenario}. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. The scene is set in a beautiful Antarctic landscape with pristine white snow, sparkling ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, heartwarming and delightful composition.`;
 }
-}
