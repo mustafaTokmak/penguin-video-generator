@@ -12,30 +12,10 @@ export interface FalRequest {
 }
 
 export async function getFalHistory(apiKey: string, limit: number = 50): Promise<FalRequest[]> {
-  try {
-    fal.config({
-      credentials: apiKey,
-    });
-
-    // Try to fetch from fal.ai requests endpoint
-    // Note: This endpoint might need to be verified with fal.ai documentation
-    const response = await fetch("https://queue.fal.run/requests", {
-      headers: {
-        "Authorization": `Key ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new APIError(`Failed to fetch fal.ai history: ${response.statusText}`, response.status);
-    }
-
-    const data = await response.json();
-    return data.requests || [];
-  } catch (error) {
-    console.error("Error fetching fal.ai history:", error);
-    throw error;
-  }
+  // TODO: fal.ai doesn't provide a public API endpoint for request history
+  // This feature would need to be implemented when/if fal.ai provides such an endpoint
+  console.warn("fal.ai request history API not available - using local storage only");
+  return [];
 }
 
 export async function getVideoRequestHistory(apiKey: string): Promise<any[]> {

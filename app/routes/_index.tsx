@@ -679,8 +679,11 @@ export default function Index() {
           {/* Video Gallery */}
           <div className="mt-12">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">
-              🎥 Previous Penguin Videos
+              🎥 Video History ({videos.length})
             </h2>
+            <p className="text-center text-white/70 mb-6">
+              All your generated penguin videos are saved and displayed here
+            </p>
             {videos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {videos.map((video) => (
@@ -715,8 +718,13 @@ export default function Index() {
                     )}
                     <div className="p-4">
                       <p className="text-gray-800 text-sm mb-2 line-clamp-2">
-                        <span className="font-semibold">Prompt:</span> {video.prompt}
+                        <span className="font-semibold">Original:</span> {video.prompt}
                       </p>
+                      {video.enhancedPrompt && video.enhancedPrompt !== video.prompt && (
+                        <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                          <span className="font-semibold">Enhanced:</span> {video.enhancedPrompt}
+                        </p>
+                      )}
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>
                           {new Date(video.createdAt).toLocaleDateString()}
@@ -728,6 +736,11 @@ export default function Index() {
                       {video.duration && (
                         <p className="text-xs text-gray-500 mt-1">
                           Duration: {video.duration}s
+                        </p>
+                      )}
+                      {video.status && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Status: <span className="capitalize">{video.status}</span>
                         </p>
                       )}
                     </div>
