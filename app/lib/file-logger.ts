@@ -1,80 +1,80 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-export interface GeneratedImage {
+export interface GeneratedVideo {
   id: string;
-  imageUrl: string;
+  videoUrl: string;
   prompt: string;
   enhancedPrompt: string;
   createdAt: string;
   status: "generated" | "approved" | "rejected";
-  revisedPrompt?: string;
+  duration?: number;
 }
 
-const IMAGES_LOG_FILE = path.join(process.cwd(), "generated-images.json");
+const VIDEOS_LOG_FILE = path.join(process.cwd(), "generated-videos.json");
 
-export async function logGeneratedImage(image: GeneratedImage): Promise<void> {
+export async function logGeneratedVideo(video: GeneratedVideo): Promise<void> {
   try {
-    let images: GeneratedImage[] = [];
+    let videos: GeneratedVideo[] = [];
 
     // Try to read existing file
     try {
-      const content = await fs.readFile(IMAGES_LOG_FILE, "utf-8");
-      images = JSON.parse(content);
+      const content = await fs.readFile(VIDEOS_LOG_FILE, "utf-8");
+      videos = JSON.parse(content);
     } catch (error) {
       // File doesn't exist or is invalid, start with empty array
-      images = [];
+      videos = [];
     }
 
-    // Add new image
-    images.push(image);
+    // Add new video
+    videos.push(video);
 
     // Write back to file
-    await fs.writeFile(IMAGES_LOG_FILE, JSON.stringify(images, null, 2));
+    await fs.writeFile(VIDEOS_LOG_FILE, JSON.stringify(videos, null, 2));
 
-    console.log(`Logged image ${image.id} to ${IMAGES_LOG_FILE}`);
+    console.log(`Logged video ${video.id} to ${VIDEOS_LOG_FILE}`);
   } catch (error) {
-    console.error("Failed to log generated image:", error);
-    throw new Error("Failed to save image log");
+    console.error("Failed to log generated video:", error);
+    throw new Error("Failed to save video log");
   }
 }
 
-export async function updateImageStatus(
-  imageId: string,
+export async function updateVideoStatus(
+  videoId: string,
   status: "approved" | "rejected",
 ): Promise<void> {
   try {
-    let images: GeneratedImage[] = [];
+    let videos: GeneratedVideo[] = [];
 
     // Read existing file
     try {
-      const content = await fs.readFile(IMAGES_LOG_FILE, "utf-8");
-      images = JSON.parse(content);
+      const content = await fs.readFile(VIDEOS_LOG_FILE, "utf-8");
+      videos = JSON.parse(content);
     } catch (error) {
-      throw new Error("No images log file found");
+      throw new Error("No videos log file found");
     }
 
-    // Find and update image
-    const imageIndex = images.findIndex((img) => img.id === imageId);
-    if (imageIndex === -1) {
-      throw new Error(`Image with ID ${imageId} not found`);
+    // Find and update video
+    const videoIndex = videos.findIndex((vid) => vid.id === videoId);
+    if (videoIndex === -1) {
+      throw new Error(`Video with ID ${videoId} not found`);
     }
 
-    images[imageIndex].status = status;
+    videos[videoIndex].status = status;
 
     // Write back to file
-    await fs.writeFile(IMAGES_LOG_FILE, JSON.stringify(images, null, 2));
+    await fs.writeFile(VIDEOS_LOG_FILE, JSON.stringify(videos, null, 2));
 
-    console.log(`Updated image ${imageId} status to ${status}`);
+    console.log(`Updated video ${videoId} status to ${status}`);
   } catch (error) {
-    console.error("Failed to update image status:", error);
-    throw new Error("Failed to update image status");
+    console.error("Failed to update video status:", error);
+    throw new Error("Failed to update video status");
   }
 }
 
-export async function getGeneratedImages(): Promise<GeneratedImage[]> {
+export async function getGeneratedVideos(): Promise<GeneratedVideo[]> {
   try {
-    const content = await fs.readFile(IMAGES_LOG_FILE, "utf-8");
+    const content = await fs.readFile(VIDEOS_LOG_FILE, "utf-8");
     return JSON.parse(content);
   } catch (error) {
     // File doesn't exist, return empty array
@@ -82,7 +82,7 @@ export async function getGeneratedImages(): Promise<GeneratedImage[]> {
   }
 }
 
-export async function getApprovedImages(): Promise<GeneratedImage[]> {
-  const allImages = await getGeneratedImages();
-  return allImages.filter((img) => img.status === "approved");
+export async function getApprovedVideos(): Promise<GeneratedVideo[]> {
+  const allVideos = await getGeneratedVideos();
+  return allVideos.filter((vid) => vid.status === "approved");
 }

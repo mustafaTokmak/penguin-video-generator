@@ -1,20 +1,21 @@
-export const APP_NAME = "Cute Penguin Image Generator";
-export const APP_DESCRIPTION = "Generate adorable penguin images with AI";
+export const APP_NAME = "Cute Penguin Video Generator";
+export const APP_DESCRIPTION = "Generate adorable penguin videos with AI";
 
-export const IMAGE_SIZES = {
-  SQUARE: "1024x1024" as const,
-  LANDSCAPE: "1792x1024" as const,
-  PORTRAIT: "1024x1792" as const,
+export const VIDEO_ASPECT_RATIOS = {
+  LANDSCAPE: "16:9" as const,
+  PORTRAIT: "9:16" as const,
+  SQUARE: "1:1" as const,
 };
 
-export const IMAGE_QUALITY = {
+export const VIDEO_QUALITY = {
   STANDARD: "standard" as const,
-  HD: "hd" as const,
+  HIGH: "high" as const,
 };
 
-export const IMAGE_STYLE = {
-  VIVID: "vivid" as const,
-  NATURAL: "natural" as const,
+export const VIDEO_DURATIONS = {
+  SHORT: 5 as const,
+  MEDIUM: 10 as const,
+  LONG: 15 as const,
 };
 
 export const PROMPT_LIMITS = {
@@ -32,7 +33,7 @@ export const STEPS = {
 
 export const ERROR_MESSAGES = {
   GENERIC: "An unexpected error occurred. Please try again.",
-  NO_API_KEY: "OpenAI API key is not configured. Using demo mode.",
+  NO_API_KEY: "Fal AI API key is not configured. Using demo mode.",
   RATE_LIMIT: "Too many requests. Please wait a moment before trying again.",
   INVALID_PROMPT: "Please enter a valid prompt (3-1000 characters).",
 };

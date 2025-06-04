@@ -34,5 +34,14 @@
     "createdAt": "2025-06-03T17:19:24.039Z",
     "status": "approved",
     "revisedPrompt": "A heartwarmingly cute penguin with fluffy black and white feathers, a bright orange beak and webbed feet, and round dark eyes. This adorable creature is pictured in a mesmerizing Antarctic landscape with unblemished white snow and glittering ice structures. The overall presentation is in the style of high-end wildlife photography, featuring natural illumination and keen attention to detail. The composition encourages a fondness towards penguins and everything they embody."
+  },
+  {
+    "id": "img_1748984596041",
+    "imageUrl": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-3K5fkipjjHZZCHDzGKO83BFa/user-Wkqy2rYJWWN7GvOO9DgwkwG9/img-lnEG5xWCwMalK3hEPZDylUpk.png?st=2025-06-03T20%3A03%3A15Z&se=2025-06-03T22%3A03%3A15Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=8b33a531-2df9-46a3-bc02-d4b1430a422c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-06-03T09%3A22%3A50Z&ske=2025-06-04T09%3A22%3A50Z&sks=b&skv=2024-08-04&sig=s6vhz7K6xoHBSPW9bTsX3RNKxZagvVkEJoFpvwaoS/o%3D",
+    "prompt": "swimming\n",
+    "enhancedPrompt": "A delightful scene of a group of cute penguins swimming joyfully in the crystal-clear, icy waters of the Antarctic. Chubby little penguins are splashing around, their fluffy feathers glistening in the sunlight as they dive beneath the surface, sending bubbles in the air. Some penguins are playfully waddling towards the water's edge, while others are mid-swim, with their flippers outstretched, creating a sense of movement and excitement. The background features mesmerizing icebergs and a bright blue sky, casting a warm glow over the scene. The composition captures the essence of fun and friendship among these charming creatures, evoking a sense of wonder.",
+    "createdAt": "2025-06-03T21:03:16.041Z",
+    "status": "approved",
+    "revisedPrompt": "Visualize a heartwarming scene of a group of adorable penguins frolicking in the pristine, icy waters of the Antarctic. These chubby, endearing penguins are splashing around, their fluff-encased bodies shimmering in the sunlight as they plunge beneath the surface, causing bubbles to rise. Some penguins are merrily waddling towards the water’s edge, while others are in the midst of swimming, their flippers splayed wide, adding a dynamic feel to the image. The scene is set against a backdrop of captivating icebergs and a radiant blue sky, casting a radiant sheen over the entire spectacle. This composition encapsulates the joy and camaraderie among these captivating creatures, invoking a sense of awe."
   }
 ]

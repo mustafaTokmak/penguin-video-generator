@@ -1,13 +1,13 @@
 import type {
-  IMAGE_QUALITY,
-  IMAGE_SIZES,
-  IMAGE_STYLE,
+  VIDEO_ASPECT_RATIOS,
+  VIDEO_QUALITY,
+  VIDEO_DURATIONS,
   STEPS,
 } from "~/lib/constants";
 
-export type ImageSize = (typeof IMAGE_SIZES)[keyof typeof IMAGE_SIZES];
-export type ImageQuality = (typeof IMAGE_QUALITY)[keyof typeof IMAGE_QUALITY];
-export type ImageStyle = (typeof IMAGE_STYLE)[keyof typeof IMAGE_STYLE];
+export type VideoAspectRatio = (typeof VIDEO_ASPECT_RATIOS)[keyof typeof VIDEO_ASPECT_RATIOS];
+export type VideoQuality = (typeof VIDEO_QUALITY)[keyof typeof VIDEO_QUALITY];
+export type VideoDuration = (typeof VIDEO_DURATIONS)[keyof typeof VIDEO_DURATIONS];
 export type Step = (typeof STEPS)[keyof typeof STEPS];
 
 export interface ActionResponse<T = unknown> {
@@ -36,11 +36,11 @@ export interface GenerateActionData extends ActionResponse {
   result: {
     id: string;
     status: "pending" | "processing" | "completed" | "failed";
-    imageUrl?: string;
+    videoUrl?: string;
     prompt: string;
     createdAt: string;
     errorMessage?: string;
-    revisedPrompt?: string;
+    duration?: number;
   };
 }
 
