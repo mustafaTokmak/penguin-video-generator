@@ -2,7 +2,11 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { VideoGenerationResult } from './video-generator';
 
-const VIDEOS_FILE = path.join(process.cwd(), 'generated-videos.json');
+const DATA_DIR = process.env.NODE_ENV === 'production' 
+  ? path.join(process.cwd(), 'data')
+  : process.cwd();
+
+const VIDEOS_FILE = path.join(DATA_DIR, 'generated-videos.json');
 
 export async function loadVideos(): Promise<VideoGenerationResult[]> {
   try {
@@ -18,6 +22,11 @@ export async function loadVideos(): Promise<VideoGenerationResult[]> {
 }
 
 export async function saveVideo(video: VideoGenerationResult): Promise<void> {
+  // Ensure data directory exists in production
+  if (process.env.NODE_ENV === 'production') {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+  }
+  
   const videos = await loadVideos();
   videos.unshift(video); // Add new video at the beginning
   
