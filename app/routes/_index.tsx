@@ -23,6 +23,7 @@ import { enhancePromptForPenguin } from "~/lib/prompt-enhancer";
 import { checkRateLimit } from "~/lib/rate-limiter.server";
 import { postToSocialMedia } from "~/lib/social-media.server";
 import { loadVideos, saveVideo } from "~/lib/video-storage.server";
+import { getVideoRequestHistory } from "~/lib/fal-history.server";
 import {
   hasError,
   isApproveActionData,
@@ -46,8 +47,40 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    const videos = await loadVideos();
-    return json({ videos });
+    const config = getConfig();
+    const falKey = config.FAL_API_KEY;
+    
+    // Load local videos
+    const localVideos = await loadVideos();
+    
+    // Try to load fal.ai history if API key is available
+    let falVideos: VideoGenerationResult[] = [];
+    if (falKey && falKey !== "your_fal_api_key_here") {
+      try {
+        falVideos = await getVideoRequestHistory(falKey);
+      } catch (error) {
+        console.warn("Could not fetch fal.ai history:", error);
+      }
+    }
+    
+    // Combine and deduplicate videos (prefer local storage for newer entries)
+    const allVideos = [...localVideos];
+    
+    // Add fal.ai videos that aren't already in local storage
+    for (const falVideo of falVideos) {
+      const exists = localVideos.some(local => 
+        local.videoUrl === falVideo.videoUrl || 
+        Math.abs(new Date(local.createdAt).getTime() - new Date(falVideo.createdAt).getTime()) < 60000
+      );
+      if (!exists) {
+        allVideos.push(falVideo);
+      }
+    }
+    
+    // Sort by creation date (newest first)
+    allVideos.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    
+    return json({ videos: allVideos.slice(0, 50) }); // Limit to 50 most recent
   } catch (error) {
     console.error("Error loading videos:", error);
     return json({ videos: [] });
@@ -644,11 +677,11 @@ export default function Index() {
           </div>
 
           {/* Video Gallery */}
-          {videos.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-3xl font-bold text-white mb-6 text-center">
-                🎥 Previous Penguin Videos
-              </h2>
+          <div className="mt-12">
+            <h2 className="text-3xl font-bold text-white mb-6 text-center">
+              🎥 Previous Penguin Videos
+            </h2>
+            {videos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {videos.map((video) => (
                   <div
@@ -701,8 +734,13 @@ export default function Index() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="text-center text-white/80 py-12">
+                <p className="text-xl mb-4">🎬 No videos generated yet</p>
+                <p>Create your first penguin video above to see it in the gallery!</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

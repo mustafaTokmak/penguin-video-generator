@@ -1,5 +1,32 @@
 [
   {
+    "id": "vid_1749073495486",
+    "status": "completed",
+    "videoUrl": "https://v3.fal.media/files/rabbit/IHMjH4idpqbKh2Pwnnocx_output.mp4",
+    "prompt": "swimming in pool ",
+    "enhancedPrompt": "A penguin mechanic swimming in pool  swimming in pool  in a penguin movie theater with popcorn and 3D glasses. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Artistic film noir style with dramatic lighting, heartwarming and delightful composition with magical penguin charm.",
+    "createdAt": "2025-06-04T21:44:55.486Z",
+    "duration": 5
+  },
+  {
+    "id": "vid_1749072429700",
+    "status": "completed",
+    "videoUrl": "https://v3.fal.media/files/rabbit/2DyithgCN2JoKuTjS5SGG_output.mp4",
+    "prompt": "swimming penguin",
+    "enhancedPrompt": "A family of emperor penguins swimming penguin as they swimming at a penguin spa with hot springs and relaxing ice baths. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Artistic film noir style with dramatic lighting, heartwarming and delightful composition with magical penguin charm.",
+    "createdAt": "2025-06-04T21:27:09.700Z",
+    "duration": 5
+  },
+  {
+    "id": "vid_1749071969323",
+    "status": "completed",
+    "videoUrl": "https://v3.fal.media/files/monkey/Cyic25U5IgKveYO2mofEk_output.mp4",
+    "prompt": "a penguin eating tofus",
+    "enhancedPrompt": "a penguin eating tofus. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, cinematic quality.",
+    "createdAt": "2025-06-04T21:19:29.323Z",
+    "duration": 5
+  },
+  {
     "id": "vid_1749071615713",
     "status": "completed",
     "videoUrl": "https://v3.fal.media/files/elephant/C1kgq_ze5QxGJ3yRMmFrO_output.mp4",
@@ -77,6 +104,33 @@
     "prompt": "swimming \n",
     "enhancedPrompt": "A colony of adorable penguins waddle down to the ocean, their fluffy bodies contrasting against the stark white Antarctic landscape, before playfully plunging into the crystal-clear water.  Each penguin's graceful underwater movements are captured with simple, clear shots, emphasizing their undeniable charm and the joyous freedom of their aquatic world.",
     "createdAt": "2025-06-04T21:13:35.713Z",
+    "status": "generated",
+    "duration": 5
+  },
+  {
+    "id": "vid_1749071969323",
+    "videoUrl": "https://v3.fal.media/files/monkey/Cyic25U5IgKveYO2mofEk_output.mp4",
+    "prompt": "a penguin eating tofus",
+    "enhancedPrompt": "a penguin eating tofus. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Set in a pristine Antarctic landscape with sparkling white snow, crystal-clear ice formations, and a serene blue sky. Professional wildlife videography style, natural lighting, smooth movements, cinematic quality.",
+    "createdAt": "2025-06-04T21:19:29.323Z",
+    "status": "generated",
+    "duration": 5
+  },
+  {
+    "id": "vid_1749072429700",
+    "videoUrl": "https://v3.fal.media/files/rabbit/2DyithgCN2JoKuTjS5SGG_output.mp4",
+    "prompt": "swimming penguin",
+    "enhancedPrompt": "A family of emperor penguins swimming penguin as they swimming at a penguin spa with hot springs and relaxing ice baths. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Artistic film noir style with dramatic lighting, heartwarming and delightful composition with magical penguin charm.",
+    "createdAt": "2025-06-04T21:27:09.700Z",
+    "status": "generated",
+    "duration": 5
+  },
+  {
+    "id": "vid_1749073495486",
+    "videoUrl": "https://v3.fal.media/files/rabbit/IHMjH4idpqbKh2Pwnnocx_output.mp4",
+    "prompt": "swimming in pool ",
+    "enhancedPrompt": "A penguin mechanic swimming in pool  swimming in pool  in a penguin movie theater with popcorn and 3D glasses. The penguins have fluffy black and white feathers, bright orange beaks and webbed feet, and adorable round dark eyes. Artistic film noir style with dramatic lighting, heartwarming and delightful composition with magical penguin charm.",
+    "createdAt": "2025-06-04T21:44:55.486Z",
     "status": "generated",
     "duration": 5
   }
