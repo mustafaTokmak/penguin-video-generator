@@ -11,13 +11,29 @@ const VIDEOS_FILE = path.join(DATA_DIR, 'generated-videos.json');
 export async function loadVideos(): Promise<VideoGenerationResult[]> {
   try {
     const data = await fs.readFile(VIDEOS_FILE, 'utf-8');
-    return JSON.parse(data);
+    const videos = JSON.parse(data);
+    
+    // Validate and clean up video data
+    const validVideos = videos.filter((video: any) => 
+      video && 
+      video.id && 
+      video.createdAt && 
+      video.prompt
+    );
+    
+    // Remove duplicates based on ID
+    const uniqueVideos = validVideos.filter((video: any, index: number, self: any[]) => 
+      index === self.findIndex((v: any) => v.id === video.id)
+    );
+    
+    return uniqueVideos;
   } catch (error) {
     // If file doesn't exist, return empty array
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return [];
     }
-    throw error;
+    console.error('Error loading videos:', error);
+    return [];
   }
 }
 

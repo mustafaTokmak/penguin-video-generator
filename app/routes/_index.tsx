@@ -686,7 +686,7 @@ export default function Index() {
             </p>
             {videos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {videos.map((video) => (
+                {videos.filter(video => video && video.id && video.createdAt).map((video) => (
                   <div
                     key={video.id}
                     className="bg-white/90 backdrop-blur-lg rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow"
@@ -727,10 +727,13 @@ export default function Index() {
                       )}
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>
-                          {new Date(video.createdAt).toLocaleDateString()}
+                          {video.createdAt ? new Date(video.createdAt).toLocaleDateString('en-US') : 'Unknown date'}
                         </span>
                         <span>
-                          {new Date(video.createdAt).toLocaleTimeString()}
+                          {video.createdAt ? new Date(video.createdAt).toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          }) : 'Unknown time'}
                         </span>
                       </div>
                       {video.duration && (
