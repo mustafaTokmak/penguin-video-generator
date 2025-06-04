@@ -1,4 +1,3 @@
-import * as fal from "@fal-ai/serverless-client";
 import { APIError } from "./errors";
 
 export interface PromptEnhancementResult {
@@ -11,7 +10,7 @@ export interface PromptEnhancementResult {
 
 export async function enhancePromptForPenguin(
   originalPrompt: string,
-  apiKey: string,
+  _apiKey?: string,
 ): Promise<PromptEnhancementResult> {
   if (!originalPrompt || originalPrompt.trim().length === 0) {
     throw new APIError("Prompt cannot be empty", 400);
@@ -21,53 +20,17 @@ export async function enhancePromptForPenguin(
     throw new APIError("Prompt is too long (max 1000 characters)", 400);
   }
 
-  // Add penguin context to the prompt
-  const penguinPrompt = `cute adorable penguin ${originalPrompt}`;
+  // Use local enhancement - it's reliable and produces excellent results
+  // The fal-ai/video-prompt-generator model requires special permissions not available with standard API keys
+  const enhancedPrompt = createPenguinPrompt(originalPrompt);
 
-  try {
-    fal.config({
-      credentials: apiKey,
-    });
-
-    const result = await fal.subscribe("fal-ai/video-prompt-generator", {
-      input: {
-        input_concept: penguinPrompt,
-        style: "Detailed",
-        camera_style: "Gimbal smoothness",
-        camera_direction: "None",
-        pacing: "Slow burn",
-        special_effects: "None",
-        model: "google/gemini-flash-1.5",
-        prompt_length: "Medium"
-      },
-    }) as { data: { prompt: string } };
-
-    const enhancedPrompt = result.data?.prompt || createPenguinPrompt(originalPrompt);
-
-    // Ensure the enhanced prompt has penguin content
-    const finalPrompt = enhancedPrompt.toLowerCase().includes('penguin') 
-      ? enhancedPrompt 
-      : `A cute penguin in a scenario: ${enhancedPrompt}. The penguin has fluffy black and white feathers, bright orange beak and webbed feet, adorable round dark eyes. Set in an Antarctic landscape with pristine white snow and sparkling ice formations.`;
-
-    return {
-      isAppropriate: true,
-      enhancedPrompt: finalPrompt,
-      originalPrompt: originalPrompt,
-      reasoning: "Enhanced prompt for video generation with penguin theme using fal.ai video prompt generator",
-      suggestedStyle: "realistic-cute",
-    };
-  } catch (error: unknown) {
-    console.warn("Failed to enhance prompt with fal.ai, using fallback:", error);
-    
-    // Fallback enhancement
-    return {
-      isAppropriate: true,
-      enhancedPrompt: createPenguinPrompt(originalPrompt),
-      originalPrompt: originalPrompt,
-      reasoning: "Enhanced prompt to be penguin-themed with detailed characteristics and Antarctic setting (fallback)",
-      suggestedStyle: "realistic-cute",
-    };
-  }
+  return {
+    isAppropriate: true,
+    enhancedPrompt,
+    originalPrompt: originalPrompt,
+    reasoning: "Enhanced prompt with diverse penguin scenarios, environments, and professional camera framing",
+    suggestedStyle: "realistic-cute",
+  };
 }
 
 function createPenguinPrompt(originalPrompt: string): string {
